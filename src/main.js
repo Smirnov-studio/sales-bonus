@@ -19,6 +19,26 @@ function calculateSimpleRevenue(purchase, _product) {
  * @returns {number}
  */
 function calculateBonusByProfit(index, total, seller) {
+    if (!seller || typeof seller.profit !== 'number') {
+        throw new Error('Некорректные данные продавца');
+    }
+
+    let bonusPercent;
+    if (index === 0) {
+        bonusPercent = 15;
+    } else if (index === 1 || index === 2) {
+        bonusPercent = 10;
+    } else if (index === total - 1) {
+        bonusPercent = 0;
+    } else {
+        bonusPercent = 5;
+    }
+
+    // Возвращаем сумму бонуса, а не процент
+    return seller.profit * bonusPercent / 100;
+}
+
+/*function calculateBonusByProfit(index, total, seller) {
     // @TODO: Расчет бонуса от позиции в рейтинге
     if (index === 0) {
         return 15;
@@ -29,7 +49,7 @@ function calculateBonusByProfit(index, total, seller) {
     } else {
         return 5;
     }
-}
+}*/
 
 /**
  * Функция для анализа данных продаж
