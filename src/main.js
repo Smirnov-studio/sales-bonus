@@ -5,7 +5,6 @@
  * @returns {number}
  */
 function calculateSimpleRevenue(purchase, _product) {
-   // @TODO: Расчет прибыли от операции
     const discountMultiplier = 1 - (purchase.discount / 100);
     const revenue = purchase.sale_price * purchase.quantity * discountMultiplier;
     return revenue;
@@ -19,37 +18,16 @@ function calculateSimpleRevenue(purchase, _product) {
  * @returns {number}
  */
 function calculateBonusByProfit(index, total, seller) {
-    if (!seller || typeof seller.profit !== 'number') {
-        throw new Error('Некорректные данные продавца');
-    }
-
-    let bonusPercent;
     if (index === 0) {
-        bonusPercent = 15;
+        return 15;  // 15% для первого места
     } else if (index === 1 || index === 2) {
-        bonusPercent = 10;
+        return 10;  // 10% для второго и третьего места
     } else if (index === total - 1) {
-        bonusPercent = 0;
+        return 0;   // 0% для последнего места
     } else {
-        bonusPercent = 5;
+        return 5;   // 5% для всех остальных
     }
-
-    // Возвращаем сумму бонуса, а не процент
-    return seller.profit * bonusPercent / 100;
 }
-
-/*function calculateBonusByProfit(index, total, seller) {
-    // @TODO: Расчет бонуса от позиции в рейтинге
-    if (index === 0) {
-        return 15;
-    } else if (index === 1 || index === 2) {
-        return 10;
-    } else if (index === total - 1) {
-        return 0;
-    } else {
-        return 5;
-    }
-}*/
 
 /**
  * Функция для анализа данных продаж
@@ -58,7 +36,7 @@ function calculateBonusByProfit(index, total, seller) {
  * @returns {{revenue, top_products, bonus, name, sales_count, profit, seller_id}[]}
  */
 function analyzeSalesData(data, options) {
-    // @TODO: Проверка входных данных
+    // Проверка входных данных
     if (!data
         || !Array.isArray(data.sellers) || data.sellers.length === 0
         || !Array.isArray(data.products) || data.products.length === 0
@@ -67,13 +45,13 @@ function analyzeSalesData(data, options) {
         throw new Error('Некорректные входные данные');
     }
 
-    // @TODO: Проверка наличия опций
+    // Проверка наличия опций
     const { calculateRevenue, calculateBonus } = options;
     if (!calculateRevenue || !calculateBonus) {
         throw new Error('Не указаны необходимые функции для расчетов');
     }
 
-    // @TODO: Подготовка промежуточных данных для сбора статистики
+    // Подготовка промежуточных данных
     const sellerStats = data.sellers.map(seller => ({
         id: seller.id,
         name: `${seller.first_name} ${seller.last_name}`,
@@ -83,7 +61,7 @@ function analyzeSalesData(data, options) {
         products_sold: {}
     }));
 
-    // @TODO: Индексация продавцов и товаров для быстрого доступа
+    // Создание индексов для быстрого доступа
     const sellerIndex = sellerStats.reduce((acc, seller) => {
         acc[seller.id] = seller;
         return acc;
@@ -94,7 +72,7 @@ function analyzeSalesData(data, options) {
         return acc;
     }, {});
 
-    // @TODO: Расчет выручки и прибыли для каждого продавца
+    // Обработка записей о продажах
     data.purchase_records.forEach(record => {
         const seller = sellerIndex[record.seller_id];
         if (!seller) return;
@@ -120,10 +98,10 @@ function analyzeSalesData(data, options) {
         });
     });
 
-    // @TODO: Сортировка продавцов по прибыли
+    // Сортировка продавцов по прибыли (по убыванию)
     sellerStats.sort((a, b) => b.profit - a.profit);
 
-    // @TODO: Назначение премий на основе ранжирования
+    // Назначение бонусов и формирование топ-10 товаров
     sellerStats.forEach((seller, index) => {
         const bonusPercent = calculateBonus(index, sellerStats.length, seller);
         seller.bonus = +(seller.profit * bonusPercent / 100).toFixed(2);
@@ -134,7 +112,7 @@ function analyzeSalesData(data, options) {
             .slice(0, 10);
     });
 
-    // @TODO: Подготовка итоговой коллекции с нужными полями
+    // Формирование итогового результата
     return sellerStats.map(seller => ({
         seller_id: seller.id,
         name: seller.name,
